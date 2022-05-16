@@ -1,0 +1,64 @@
+clc,clear
+syms r theta beta
+
+% 圆锥参数 %
+conerd = 0.4;     % 圆锥面参数，3个选值：0.4  or 1 or 3 
+alpha = atan(1/conerd); %圆锥角
+% A B点坐标  %
+xa = 1;
+ya = 2;
+za = 2*sqrt(5)/5;
+xb = 1;
+yb = 0;
+zb = 0.8;
+
+j=1;
+for k=0.5:0.01:2
+    if k~=0
+        %  平面参数  %
+%        k=0.6;
+        %  由k计算方程的各项系数
+         ka = -0.8+5.2*k;
+         kb = -0.8+2.2*k;
+         kc = 2+2*k;
+         kd = -6*k;
+        % 圆锥投影角与展开为扇面的圆心的转换 %
+         theta = beta/sin(alpha);  %theta 为投影角  beta为扇面角
+        % 圆锥面的极坐标公式带入平面公式 %
+         %eqn1 = ka*r*cos(theta)*sin(alpha) + kb*r*sin(theta)*sin(alpha) + kc*r*cos(alpha)+kd ==0  
+        % 用beta表示r % 
+         r = -kd/(ka*cos(beta/sin(alpha))+kb*sin(beta/sin(alpha))*sin(alpha)+kc*cos(alpha));
+        % 计算A B两点的极坐标 %
+        ra = za/cos(alpha);    % A点的母线长
+        rb = zb/cos(alpha);    % B点的母线长
+        theta_a = acos(xa/(ra*sin(alpha)));  % r1*sin(alpha)为圆锥母线在xoy平面的投影长度
+        theta_b = acos(xb/(rb*sin(alpha)));  % r1*sin(alpha)为圆锥母线在xoy平面的投影长度
+        %%%%%将圆锥展开为扇面%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        beta_a_sec = theta_a*sin(alpha); %展开到扇面后的角度转换
+        beta_b_sec = theta_b*sin(alpha);
+        i=1
+        sum=0;
+        betadelt=(beta_b_sec-beta_a_sec)/100  % 分隔为小的角度增量
+        for beta=beta_a_sec:betadelt:beta_b_sec   % 从A点角度到B点角度进行累加计算
+            % 计算坐标1 % 
+            r0 = -kd/(ka*cos(beta/sin(alpha))+kb*sin(beta/sin(alpha))*sin(alpha)+kc*cos(alpha));  % 计算母线长度 %              
+            xa_sec = r0 * cos(beta);   %起点的扇面坐标值
+            ya_sec = r0 * sin(beta);
+            betaPlus = beta + betadelt;
+             % 计算坐标2 % 
+            r1 = -kd/(ka*cos(betaPlus/sin(alpha))+kb*sin(betaPlus/sin(alpha))*sin(alpha)+kc*cos(alpha));            
+            xb_sec = r1 * cos(betaPlus);   %增加一个角度后的另一点的扇面坐标值
+            yb_sec = r1 * sin(betaPlus);
+            % 累加线段长度直线最短距离%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            sum = sum + sqrt((xa_sec-xb_sec)^2+(ya_sec-yb_sec)^2);
+            i=i+1
+        end
+        l_ab(j) = sum;        
+    end
+    j=j+1
+end
+        %求积分获得线段长度
+        %l_ab(i)=int(r*beta,beta,beta_a_sec,beta_b_sec);
+       
+
+ plot(1:length(l_ab),l_ab)
